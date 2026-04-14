@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, NotFoundException, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './user.entity';
@@ -6,7 +6,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
+  async onModuleInit() {
+    await this.seed();
+  }
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -64,6 +69,9 @@ export class UsersService {
         password: 'gaslink2024',
         role: UserRole.SUPER_ADMIN,
       });
+      this.logger.log('✅ Usuario superadmin creado exitosamente');
+    } else {
+      this.logger.log('ℹ️ Usuario superadmin ya existe');
     }
   }
 }
